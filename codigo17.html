@@ -680,7 +680,6 @@
 
             <div id="category-selector-panel">
                 <button class="category-button" data-view="alpha">ABC</button>
-                <button class="category-button" data-view="numbers">123</button>
                 <button class="category-button" data-view="concepts">Conceptos</button>
                 <button class="category-button" data-view="questions">Preguntas</button>
             </div>
@@ -852,6 +851,7 @@
     const SERVER_URL = 'https://traductor-lds-server.onrender.com'; 
     let socket = null;
     let currentRoomCode = null;
+       socket = io(SERVER_URL);
 
 
     let currentMode = 'sign'; 

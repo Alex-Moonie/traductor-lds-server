@@ -51,4 +51,3 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
   console.log(`🚀 Servidor Socket.io corriendo en http://localhost:${PORT}`);
 });
-setse

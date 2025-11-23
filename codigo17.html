@@ -1,0 +1,1426 @@
+  <!DOCTYPE html>
+<html lang="es">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mani_Manita - Traductor de Lenguaje de Señas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+
+    
+<style>                             
+    :root {
+        --cute-pink: #FF69B4;       
+        --cute-orange: #FFA500;     
+        --cute-teal: #00CED1;       
+        --cute-yellow: #FFD700;     
+        
+        --space-pastel: #A2D9CE;     
+        --num-pastel: #FFC9A3;       
+        --copy-pastel: #FFF59D;      
+        --clear-pastel: #FFC0CB;     
+        --delete-pastel: #F4A5B7;    
+
+        --primary-color: var(--cute-teal);      
+        --danger-color: var(--delete-pastel);
+        --switch-mode-color: #9370DB;           
+        
+        --bg-gradient: linear-gradient(135deg, 
+            #FFC0CB, #FFD7A8, #FFFACD, 
+            #B0E0E6, #98FB98, #E6E6FA,
+            #FFC0CB
+        );
+        --card-bg-color: #F7F7FF;    
+        --text-color: #333333;                  
+        --light-text-color: #777777;            
+        --border-color: #e0e0e0;                
+        
+        --concept-color: var(--cute-pink);      
+        --connected-color: var(--cute-teal);    
+
+        --dark-bg-color: #121212;
+        --dark-card-bg-color: #1E1E1E;
+        --dark-text-color: #E0E0E0;
+        --dark-border-color: #333333;
+        --dark-gradient: linear-gradient(135deg, #2C3E50, #000000); 
+    }
+
+    .dark-mode { 
+        background: var(--dark-gradient) !important;
+        background-size: 400% 400% !important;
+        animation: gradientShift 30s ease infinite !important;
+        color: var(--dark-text-color) !important;
+    }
+
+    .dark-mode .container {
+        background-color: var(--dark-card-bg-color) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 15px rgba(50, 50, 50, 0.8) inset !important;
+        border: 1px solid var(--dark-border-color);
+    }
+
+    .dark-mode h1, .dark-mode .config-button, .dark-mode .logo-section {
+        color: var(--cute-pink) !important; 
+    }
+
+    .dark-mode .mode-status {
+        background-color: var(--cute-teal) !important; 
+    }
+
+    .dark-mode #output-area, .dark-mode #text-input-area, .dark-mode .sign-button {
+        background-color: #2D2D2D !important; 
+        color: var(--dark-text-color) !important;
+        border: 4px solid var(--cute-teal) !important;
+    }
+
+    .dark-mode #output-area .output-space {
+        background-color: var(--cute-teal) !important;
+    }
+
+    .dark-mode .sign-button {
+        border: 4px solid transparent !important; 
+        
+        border-image-source: linear-gradient(
+            to right, 
+            #FFC0CB,   
+            #FFDDAF,   
+            #A0E7E5,   
+            #DCD0FF    
+        ) !important;
+        border-image-slice: 1 !important; 
+    }
+
+    .dark-mode .sign-button span {
+         color: var(--dark-text-color) !important;
+    }
+
+    .dark-mode .category-button, .dark-mode #category-selector-panel {
+        background-color: #333333 !important;
+    }
+    .dark-mode .panel-control-button {
+        background-color: var(--cute-pink) !important;
+    }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    body { 
+        font-family: 'Baloo 2', sans-serif; 
+        margin: 0; 
+        padding: 0; 
+        background: var(--bg-gradient);
+        background-size: 400% 400%;
+        animation: gradientShift 25s ease infinite; 
+        color: var(--text-color);
+        text-align: center;
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .container {
+        max-width: 900px;
+        width: 100%;
+        background-color: var(--card-bg-color); 
+        border-radius: 20px; 
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 15px rgba(255, 255, 255, 0.8) inset; 
+        padding: 20px 15px; 
+        margin-bottom: 20px; 
+        box-sizing: border-box; 
+        transition: box-shadow 0.3s ease; 
+    }
+    
+    h1 {
+        color: var(--cute-pink); 
+        font-weight: 700;
+        margin-bottom: 5px;
+        font-size: 2.2em; 
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1); 
+        font-family: 'Sacramento', cursive; 
+        line-height: 1;
+    }
+
+    .logo-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px; 
+        padding-bottom: 10px;
+        border-bottom: 2px dashed var(--cute-teal); 
+    }
+    
+    .logo-section h1 {
+         margin: 0;
+         flex-grow: 1; 
+         text-align: left;
+    }
+    
+    .logo-section img {
+        max-width: 60px; 
+        height: auto;
+        border-radius: 50%; 
+        box-shadow: 0 0 10px var(--cute-orange); 
+        margin-right: 15px;
+    }
+    
+    .config-button {
+         background: none; border: none; font-size: 28px; cursor: pointer;
+         color: var(--cute-pink); 
+         padding: 5px; margin-left: auto;
+         transition: color 0.2s, transform 0.2s; 
+    }
+    
+    #text-area-group {
+        width: 100%; 
+    }
+
+    /* ESTILO MODIFICADO PARA OCUPAR TODO EL ANCHO */
+    .mode-status { 
+        font-size: 1.2em; 
+        font-weight: 700; 
+        color: white; 
+        padding: 10px 20px;
+        margin-bottom: 15px; 
+        border-radius: 25px; 
+        background-color: var(--connected-color); 
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        
+        display: flex; 
+        justify-content: center; 
+        align-items: center;
+        text-align: center;
+        
+        width: 100%; /* <<-- ¡Aseguramos el 100%! */
+        flex-shrink: 0; /* <<-- ¡NUEVO! Evita que se encoja dentro del contenedor flex padre */
+        box-sizing: border-box; /* <<-- ¡NUEVO! Incluye el padding dentro del 100% */
+        
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    #output-area { 
+        min-height: 120px; 
+        border: 4px solid var(--primary-color); 
+        padding: 12px; 
+        margin-bottom: 15px; 
+        font-size: 1.8em; 
+        text-align: left;
+        border-radius: 15px; 
+        background-color: #FFFFFF; 
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex; flex-wrap: wrap; align-items: flex-start;
+        gap: 4px; overflow-y: auto; 
+        width: 100%; 
+        box-sizing: border-box; 
+    }
+
+    #output-area .sign-output-image {
+        height: 45px; 
+        width: auto; object-fit: contain; vertical-align: middle;
+        transition: transform 0.2s;
+    }
+
+    .output-space {
+        width: 12px; height: 45px; background-color: var(--cute-yellow); 
+        border-radius: 5px; display: inline-block; vertical-align: middle; margin: 0 1px;
+    }
+    
+    #text-input-area {
+        width: 100%; min-height: 100px; 
+        padding: 12px;
+        border: 4px solid var(--switch-mode-color); 
+        border-radius: 15px;
+        font-size: 1.2em; resize: vertical; margin-bottom: 15px; 
+        box-sizing: border-box;
+        font-family: 'Baloo 2', sans-serif; 
+        background-color: #FFFFFF; 
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .function-buttons {
+        display: flex; 
+        justify-content: center; 
+        gap: 10px; 
+        margin: 15px auto 10px; 
+        flex-wrap: wrap; 
+        width: 100%; 
+        box-sizing: border-box; 
+    }
+    
+    .function-buttons button { 
+        border: none;
+        border-radius: 12px; 
+        height: 50px; 
+        font-size: 1em; 
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        padding: 0 12px;
+        box-shadow: 0 5px 0px rgba(0, 0, 0, 0.2); 
+        flex-grow: 1;
+        min-width: 60px; 
+        box-sizing: border-box; 
+        color: white; 
+    }
+    #num-mode-button {
+        background-color: var(--num-pastel) !important;
+        color: var(--text-color) !important;
+    }
+    #space-button {
+        background-color: var(--space-pastel) !important; 
+        color: var(--text-color) !important; 
+    }
+    #delete-button {
+        background-color: var(--delete-pastel) !important; 
+        color: white !important; 
+    }
+    #clear-all-button {
+        background-color: var(--clear-pastel) !important; 
+        color: var(--text-color) !important; 
+    }
+    #copy-button {
+        background-color: var(--copy-pastel) !important; 
+        color: var(--text-color) !important; 
+    }
+    #mode-switch-button {
+        background-color: var(--switch-mode-color) !important;
+        color: white !important;
+    }
+    /* NUEVO ESTILO DE BOTÓN DE CHAT */
+    #send-chat-button {
+        background-color: var(--cute-teal) !important;
+        color: white !important;
+    }
+
+    .function-buttons button:active {
+        transform: translateY(3px); 
+        box-shadow: 0 2px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    .function-buttons button:hover {
+         opacity: 0.9;
+         filter: brightness(1.1);
+    }
+    
+    .panel-control-button {
+        width: 45px; 
+        height: 45px; 
+        font-size: 28px; 
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 50%; 
+        cursor: pointer;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2); 
+        transition: all 0.2s;
+    }
+
+
+    #main-interaction {
+        display: block; 
+        width: 100%;
+    }
+
+    #extra-controls-panel {
+        display: flex; 
+        justify-content: flex-end; 
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    #category-selector-panel {
+        display: none; 
+        justify-content: flex-end;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 0;
+        margin-bottom: 10px;
+        border-top: 2px solid var(--cute-yellow); 
+        border-bottom: 2px solid var(--cute-yellow); 
+        background-color: #FFF8E1; 
+        border-radius: 10px; 
+    }
+    
+    .category-button {
+        padding: 8px 18px; 
+        font-size: 1em;
+        font-weight: 700;
+        border: none !important; 
+        border-radius: 20px; 
+        color: white;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        background-color: var(--concept-color); 
+    }
+    
+    .category-button[data-view="questions"] {
+         background-color: var(--cute-teal); 
+    }
+
+    .category-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 8px rgba(0, 0, 0, 0.25);
+    }
+    
+    .keyboard-wrapper {
+         max-width: 100%; 
+         width: 100%; 
+         position: relative; 
+    }
+
+    .keyboard-view {
+        display: none; 
+    }
+    
+    .extra-keyboard-view {
+        display: none; 
+        position: absolute; 
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding-top: 10px;
+        background-color: var(--card-bg-color);
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+    }
+
+    
+    .keyboard-grid { 
+        display: grid; 
+        gap: 8px; 
+        margin: 0 !important; 
+        width: 100%; 
+        box-sizing: border-box;
+        padding-top: 0 !important;
+        border-top: none !important;
+    }
+
+    #alpha-keyboard-view #keyboard { 
+        grid-template-columns: repeat(4, 1fr); 
+    }
+
+    #number-keyboard { 
+         grid-template-columns: repeat(3, 1fr); 
+    }
+    #concepts-keyboard, #questions-keyboard {
+        grid-template-columns: repeat(4, 1fr); 
+    }
+
+    .sign-button {
+        background-color: #FFFFFF; 
+        border: 4px solid transparent; 
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+        border-radius: 15px; 
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+        display: flex; 
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+        
+        border-image-slice: 1;
+        border-image-source: linear-gradient(
+            to right, 
+            var(--cute-yellow),  
+            var(--cute-pink),    
+            var(--cute-teal),    
+            var(--cute-orange)   
+        );
+    }
+    
+    .sign-button:hover {
+        transform: scale(1.05); 
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .sign-button span {
+        font-family: 'Baloo 2', sans-serif;
+        font-weight: 700;
+    }
+
+    .sign-button img {
+         max-width: 50px; 
+         max-height: 60px; 
+         width: auto; 
+         object-fit: contain;
+    }
+
+    .number-button {
+        background-color: var(--num-pastel) !important;
+        color: white;
+        font-weight: 700; 
+        border: 4px solid transparent; 
+    }
+    
+    .concept-button {
+        background-color: var(--concept-color);
+        color: white;
+        font-weight: 700;
+        border: 4px solid transparent; 
+    }
+    
+    .number-button .sign-image, .concept-button .sign-image {
+         filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 5px rgba(0, 0, 0, 0.2)); 
+    }
+
+
+    @media (min-width: 800px) {
+        
+        .container {
+            max-width: 700px; 
+            width: 100%;
+        }
+        
+        #main-interaction, #text-area-group, .logo-section, .function-buttons, .mode-status {
+             width: 100% !important;
+             order: initial !important; 
+             margin-top: initial !important; 
+        }
+        
+        #main-interaction {
+             margin-top: 15px; 
+        }
+        
+        .container:not(.text-mode-active) #extra-controls-panel {
+             display: none !important; 
+        }
+
+        .container:not(.text-mode-active) #category-selector-panel {
+             display: flex !important; 
+             justify-content: center;
+             border-bottom: none !important; 
+             margin-bottom: 5px; 
+        }
+        
+        #alpha-keyboard-view #keyboard { 
+             grid-template-columns: repeat(6, 1fr); 
+        }
+
+        #number-keyboard {
+             grid-template-columns: repeat(4, 1fr); 
+        }
+        
+         #concepts-keyboard, #questions-keyboard {
+            grid-template-columns: repeat(6, 1fr); 
+        }
+        
+         .extra-keyboard-view {
+            position: absolute; 
+            top: 55px; 
+            left: 0;
+            width: 100%; 
+        }
+
+        .container:not(.text-mode-active) #text-input-area {
+            display: none;
+        }
+
+        .text-mode-active.container {
+             padding: 15px;
+        }
+        
+        .text-mode-active #main-interaction {
+            display: none;
+        }
+
+        .text-mode-active #text-area-group {
+            display: flex; 
+            flex-direction: column; 
+            gap: 0; 
+        }
+
+        .text-mode-active #output-area {
+            min-height: 180px; 
+            margin-bottom: 0px; 
+            flex-grow: 1;
+        }
+        
+        .text-mode-active #text-input-area {
+            min-height: 120px;
+            margin-top: 10px; 
+            margin-bottom: 0px; 
+            display: block !important;
+        }
+    }
+
+    .modal {
+        display: none; 
+        position: fixed; 
+        z-index: 200; 
+        left: 0;
+        top: 0;
+        width: 100%; 
+        height: 100%; 
+        overflow: auto; 
+        background-color: rgba(0, 0, 0, 0.4); 
+    }
+
+    .modal-content {
+        background-color: var(--card-bg-color);
+        margin: 10% auto; 
+        padding: 25px;
+        border-radius: 20px;
+        width: 80%; 
+        max-width: 400px; 
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        position: relative;
+        color: var(--text-color);
+    }
+
+    .close-button {
+        color: var(--text-color);
+        float: right;
+        font-size: 35px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .close-button:hover,
+    .close-button:focus {
+        color: var(--cute-pink);
+        text-decoration: none;
+    }
+
+    .modal-content h3 {
+        color: var(--cute-teal);
+        margin-top: 0;
+        font-weight: 700;
+    }
+
+    .config-option {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border: none;
+        border-radius: 10px;
+        background-color: var(--primary-color);
+        color: white;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.2s;
+        box-shadow: 0 3px 0px rgba(0, 0, 0, 0.2); 
+    }
+
+    .config-option:hover {
+        background-color: var(--cute-pink);
+        transform: translateY(-1px);
+    }
+
+    .config-option:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    .dark-mode .modal-content {
+        background-color: var(--dark-card-bg-color) !important;
+    }
+    .dark-mode .config-option {
+        background-color: var(--cute-teal) !important;
+    }
+    .dark-mode .config-option:hover {
+        background-color: var(--cute-pink) !important;
+    }
+
+    #config-copy-button {
+        background-color: var(--copy-pastel) !important;
+        color: var(--text-color) !important;
+        box-shadow: 0 3px 0px var(--text-color) !important;
+    }
+</style>
+
+
+ <body>
+    <div class="container" id="main-container">
+
+        <div class="logo-section">
+            <img src="https://alex-moonie.github.io/ManiManita-Fotos/logo.png" alt="Logo Mani_Manita">
+            <h1>Traductor LDS</h1><br>
+        
+            <button class="config-button" id="open-config-modal">⚙️</button>
+        </div>
+
+        <div class="mode-status" id="mode-status-text">
+            Estás usando Modo: SEÑAS 🤟
+        </div>
+
+        <div id="text-area-group">
+            <div id="output-area"></div>
+
+            <textarea id="text-input-area" placeholder="Escribe tu mensaje aquí..."></textarea>
+        </div>
+
+        <div class="function-buttons">
+            <button id="num-mode-button">Números</button>
+            <button id="space-button">Espacio</button>
+            <button id="delete-button">Borrar</button>
+            <button id="clear-all-button">Limpiar Todo</button>
+            <button id="mode-switch-button">Cambiar a Modo Texto</button>
+            <button id="send-chat-button" class="function-button">Enviar Mensaje Chat 🚀</button>
+        </div>
+
+        <div id="main-interaction">
+
+            <div id="extra-controls-panel">
+                <button class="panel-control-button" id="toggle-extras-button" title="Mostrar/Ocultar Categorías">➕</button>
+            </div>
+
+            <div id="category-selector-panel">
+                <button class="category-button" data-view="alpha">ABC</button>
+                <button class="category-button" data-view="numbers">123</button>
+                <button class="category-button" data-view="concepts">Conceptos</button>
+                <button class="category-button" data-view="questions">Preguntas</button>
+            </div>
+
+            <div class="keyboard-wrapper">
+                
+                <div class="keyboard-view" id="alpha-keyboard-view">
+                    <div class="keyboard-grid" id="keyboard">
+                        <button class="sign-button" data-letter="A"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraA.jpg.png" alt="Seña A"><span>A</span></button>
+                        <button class="sign-button" data-letter="B"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraB.jpg.png" alt="Seña B"><span>B</span></button>
+                        <button class="sign-button" data-letter="C"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraC.jpg.png" alt="Seña C"><span>C</span></button>
+                        <button class="sign-button" data-letter="D"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraD.jpg.png" alt="Seña D"><span>D</span></button>
+                        <button class="sign-button" data-letter="E"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraE.jpg.png" alt="Seña E"><span>E</span></button>
+                        <button class="sign-button" data-letter="F"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraF.jpg.png" alt="Seña F"><span>F</span></button>
+                        <button class="sign-button" data-letter="G"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraG.jpg.png" alt="Seña G"><span>G</span></button>
+                        <button class="sign-button" data-letter="H"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraH.jpg.png" alt="Seña H"><span>H</span></button>
+                        <button class="sign-button" data-letter="I"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraI.jpg.png" alt="Seña I"><span>I</span></button>
+                        <button class="sign-button" data-letter="J"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraJ.jpg.png" alt="Seña J"><span>J</span></button>
+                        <button class="sign-button" data-letter="K"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraK.jpg.png" alt="Seña K"><span>K</span></button>
+                        <button class="sign-button" data-letter="L"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraL.jpg.png" alt="Seña L"><span>L</span></button>
+                        <button class="sign-button" data-letter="LL"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraLL.jpg.png" alt="Seña Ll"><span>LL</span></button>
+                        <button class="sign-button" data-letter="M"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraM.jpg.png" alt="Seña M"><span>M</span></button>
+                        <button class="sign-button" data-letter="N"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraN.jpg.png" alt="Seña N"><span>N</span></button>
+                        <button class="sign-button" data-letter="Ñ"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraÑ.jpg.png" alt="Seña Ñ"><span>Ñ</span></button>
+                        <button class="sign-button" data-letter="O"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraO.jpg.png" alt="Seña O"><span>O</span></button>
+                        <button class="sign-button" data-letter="P"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraP.jpg.png" alt="Seña P"><span>P</span></button>
+                        <button class="sign-button" data-letter="Q"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraQ.jpg.png" alt="Seña Q"><span>Q</span></button>
+                        <button class="sign-button" data-letter="R"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraR.jpg.png" alt="Seña R"><span>R</span></button>
+                        <button class="sign-button" data-letter="RR"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraRR.jpg.png" alt="Seña Rr"><span>RR</span></button>
+                        <button class="sign-button" data-letter="S"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraS.jpg.png" alt="Seña S"><span>S</span></button>
+                        <button class="sign-button" data-letter="T"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraT.jpg.png" alt="Seña T"><span>T</span></button>
+                        <button class="sign-button" data-letter="U"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraU.jpg.png" alt="Seña U"><span>U</span></button>
+                        <button class="sign-button" data-letter="V"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraV.jpg.png" alt="Seña V"><span>V</span></button>
+                        <button class="sign-button" data-letter="W"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraW.jpg.png" alt="Seña W"><span>W</span></button>
+                        <button class="sign-button" data-letter="X"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraX.jpg.png" alt="Seña X"><span>X</span></button>
+                        <button class="sign-button" data-letter="Y"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraY.jpg.png" alt="Seña Y"><span>Y</span></button>
+                        <button class="sign-button" data-letter="Z"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/LetraZ.jpg.png" alt="Seña Z"><span>Z</span></button>
+                    </div>
+                </div>
+                
+                <div id="number-keyboard-view" class="keyboard-view extra-keyboard-view">
+                    <div id="number-keyboard" class="keyboard-grid">
+                        <button class="sign-button number-button" data-letter="CERO"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/0.png" alt="Seña 0"><span>0</span></button>
+                        <button class="sign-button number-button" data-letter="UNO"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/1.png" alt="Seña 1"><span>1</span></button>
+                        <button class="sign-button number-button" data-letter="DOS"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/2.png" alt="Seña 2"><span>2</span></button>
+                        <button class="sign-button number-button" data-letter="TRES"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/3.png" alt="Seña 3"><span>3</span></button>
+                        <button class="sign-button number-button" data-letter="CUATRO"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/4.png" alt="Seña 4"><span>4</span></button>
+                        <button class="sign-button number-button" data-letter="CINCO"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/5.png" alt="Seña 5"><span>5</span></button>
+                        <button class="sign-button number-button" data-letter="SEIS"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/6.png" alt="Seña 6"><span>6</span></button>
+                        <button class="sign-button number-button" data-letter="SIETE"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/7.png" alt="Seña 7"><span>7</span></button>
+                        <button class="sign-button number-button" data-letter="OCHO"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/8.png" alt="Seña 8"><span>8</span></button>
+                        <button class="sign-button number-button" data-letter="NUEVE"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/9.png" alt="Seña 9"><span>9</span></button>
+                        <button class="sign-button number-button" data-letter="DIEZ"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/10.png" alt="Seña 10"><span>10</span></button>
+                    </div>
+                </div>
+                
+                <div id="concepts-keyboard-view" class="keyboard-view extra-keyboard-view">
+                    <div id="concepts-keyboard" class="keyboard-grid">
+                        <button class="sign-button concept-button" data-letter="HOLA"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/hola.png" alt="Seña HOLA"><span>HOLA</span></button>
+                        <button class="sign-button concept-button" data-letter="GRACIAS"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/GRACIAS.png" alt="Seña GRACIAS"><span>GRACIAS</span></button>
+                        <button class="sign-button concept-button" data-letter="AYUDA"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/ayuda.png" alt="Seña AYUDA"><span>AYUDA</span></button>
+                        <button class="sign-button concept-button" data-letter="NOMBRE"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/nombre.png" alt="Seña NOMBRE"><span>NOMBRE</span></button>
+                        <button class="sign-button concept-button" data-letter="COMER"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/comer.png" alt="Seña COMER"><span>COMER</span></button>
+                        <button class="sign-button concept-button" data-letter="BEBER"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/beber.png" alt="Seña BEBER"><span>BEBER</span></button>
+                        <button class="sign-button concept-button" data-letter="BAÑO"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/baño.png" alt="Seña BAÑO"><span>BAÑO</span></button>
+                        <button class="sign-button concept-button" data-letter="ESPERA"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/esperar.png" alt="Seña ESPERA"><span>ESPERA</span></button>
+                        <button class="sign-button concept-button" data-letter="¿CÓMO?"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/COMO.png" alt="Seña ¿CÓMO?"><span>¿CÓMO?</span></button>
+                        <button class="sign-button concept-button" data-letter="BIEN"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/BIEN.png" alt="Seña BIEN"><span>BIEN</span></button>
+                        <button class="sign-button concept-button" data-letter="MAL"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/MAL.png" alt="Seña MAL"><span>MAL</span></button>
+                    </div>
+                </div>
+                
+                <div id="questions-keyboard-view" class="keyboard-view extra-keyboard-view">
+                    <div id="questions-keyboard" class="keyboard-grid">
+                         <button class="sign-button concept-button" data-letter="¿QUIÉN?"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/QUIEN.png" alt="Seña ¿QUIÉN?"><span>¿QUIÉN?</span></button>
+                         <button class="sign-button concept-button" data-letter="¿QUÉ?"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/QUE.png" alt="Seña ¿QUÉ?"><span>¿QUÉ?</span></button>
+                         <button class="sign-button concept-button" data-letter="¿CUÁNDO?"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/CUANDO.png" alt="Seña ¿CUÁNDO?"><span>¿CUÁNDO?</span></button>
+                         <button class="sign-button concept-button" data-letter="¿DÓNDE?"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/DONDE.png" alt="Seña ¿DÓNDE?"><span>¿DÓNDE?</span></button>
+                         <button class="sign-button concept-button" data-letter="¿POR QUÉ?"><img class="sign-image" src="https://alex-moonie.github.io/ManiManita-Fotos/por que.png" alt="Seña ¿POR QUÉ?"><span>¿POR QUÉ?</span></button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div> 
+    </div> 
+    
+    <div id="config-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-config-modal">&times;</span>
+            <h3>Opciones de Configuración</h3>
+            
+            <button class="config-option" id="config-dark-mode-button">Cambiar a Modo Oscuro 🌙</button>
+            
+            <button class="config-option" id="config-qr-button">Opciones de QR / Chat 🤝</button>
+
+            <button class="config-option" id="config-copy-button">Copiar Texto Generado 📋</button>
+            
+            <button class="config-option" id="config-clear-button">Limpiar Área de Salida 🗑️</button>
+            
+            <button class="config-option" id="config-info-button">Más información sobre Mani_Manita 💖</button>
+            
+            <p style="margin-top: 20px; font-size: 0.9em; color: var(--light-text-color);">Hecho con 💖 para LSA - v1.2</p>
+        </div>
+    </div>
+    
+    <div id="qr-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-qr-modal">&times;</span>
+            <h3>Conexión y Mensajes QR</h3>
+            
+            <p style="font-weight: bold; color: var(--cute-teal);">1. Sala de Chat (Conexión Bidireccional)</p>
+            <p style="font-size: 0.9em; color: var(--light-text-color);">Genera un código único para que el otro dispositivo se conecte y chateen.</p>
+            <button class="config-option" id="generate-room-qr-button">Generar QR de Sala</button>
+            <div id="room-qr-code" style="margin: 15px auto; padding: 10px; border: 2px solid var(--connected-color); display: none; width: 200px; height: 200px;"></div>
+            
+            <hr style="border-top: 1px dashed var(--border-color); margin: 20px 0;">
+
+            <p style="font-weight: bold; color: var(--cute-teal);">2. Mensaje Escaneable (Texto de Salida)</p>
+            <p style="font-size: 0.9em; margin-bottom: 10px;">Genera un QR con el texto actual de la pantalla para una lectura rápida.</p>
+            <button class="config-option" id="generate-message-qr-button">Generar QR de Mensaje</button>
+            <div id="message-qr-code" style="margin: 15px auto; padding: 10px; border: 2px solid var(--cute-teal); display: none; width: 200px; height: 200px;"></div>
+        </div>
+    </div>
+
+
+     <script>
+    const alphaKeyboardView = document.getElementById('alpha-keyboard-view');
+    const conceptsKeyboardView = document.getElementById('concepts-keyboard-view');
+    const questionsKeyboardView = document.getElementById('questions-keyboard-view');
+    const numberKeyboardView = document.getElementById('number-keyboard-view');
+    
+    const extraControlsPanel = document.getElementById('extra-controls-panel');
+    const toggleExtrasButton = document.getElementById('toggle-extras-button');
+    const categorySelectorPanel = document.getElementById('category-selector-panel');
+    const categoryButtons = document.querySelectorAll('#category-selector-panel .category-button');
+    
+    const numModeButton = document.getElementById('num-mode-button'); 
+    const spaceButton = document.getElementById('space-button');
+    const deleteButton = document.getElementById('delete-button');
+    const clearAllButton = document.getElementById('clear-all-button'); 
+    const modeSwitchButton = document.getElementById('mode-switch-button');
+
+    const outputArea = document.getElementById('output-area');
+    const textInputArea = document.getElementById('text-input-area');
+    const modeStatusDiv = document.getElementById('mode-status-text'); 
+    const mainContainer = document.getElementById('main-container');
+    const body = document.body; 
+    
+    const configButton = document.getElementById('open-config-modal');
+    const configModal = document.getElementById('config-modal');
+    const closeModalButton = document.getElementById('close-config-modal');
+    const configCopyButton = document.getElementById('config-copy-button');
+    const configClearButton = document.getElementById('config-clear-button');
+    const configDarkModeButton = document.getElementById('config-dark-mode-button');
+    const configInfoButton = document.getElementById('config-info-button');
+    
+    // VARIABLES DEL CHAT/QR (NUEVAS)
+    const qrModal = document.getElementById('qr-modal');
+    const closeQrModalButton = document.getElementById('close-qr-modal');
+    const generateRoomQrButton = document.getElementById('generate-room-qr-button');
+    const roomQrCodeDiv = document.getElementById('room-qr-code');
+    const generateMessageQrButton = document.getElementById('generate-message-qr-button');
+    const messageQrCodeDiv = document.getElementById('message-qr-code');
+    const sendChatButton = document.getElementById('send-chat-button');
+    const configQrButton = document.getElementById('config-qr-button'); // Botón para abrir el modal de QR
+    
+    // VARIABLES DE ESTADO DEL CHAT
+    const SERVER_URL = 'http://localhost:3000'; 
+    let socket = null;
+    let currentRoomCode = null;
+
+
+    let currentMode = 'sign'; 
+    let currentActiveKeyboard = 'alpha'; 
+    let currentExtraKeyboard = null; 
+    let extraPanelOpen = false; 
+    
+        const SIGN_MAP = {
+            'A': 'LetraA.jpg', 'B': 'LetraB.jpg', 'C': 'LetraC.jpg', 'D': 'LetraD.jpg', 'E': 'LetraE.jpg', 
+            'F': 'LetraF.jpg', 'G': 'LetraG.jpg', 'H': 'LetraH.jpg', 'I': 'LetraI.jpg', 'J': 'LetraJ.jpg', 
+            'K': 'LetraK.jpg', 'L': 'LetraL.jpg', 'LL': 'LetraLL.jpg', 'M': 'LetraM.jpg', 'N': 'LetraN.jpg', 
+            'Ñ': 'LetraÑ.jpg', 'O': 'LetraO.jpg', 'P': 'LetraP.jpg', 'Q': 'LetraQ.jpg', 'R': 'LetraR.jpg', 
+            'RR': 'LetraRR.jpg', 'S': 'LetraS.jpg', 'T': 'LetraT.jpg', 'U': 'LetraU.jpg', 'V': 'LetraV.jpg', 
+            'W': 'LetraW.jpg', 'X': 'LetraX.jpg', 'Y': 'LetraY.jpg', 'Z': 'LetraZ.jpg',
+            
+            'CERO': '0', 'UNO': '1', 'DOS': '2', 'TRES': '3', 'CUATRO': '4',
+            'CINCO': '5', 'SEIS': '6', 'SIETE': '7', 'OCHO': '8', 'NUEVE': '9', 'DIEZ': '10',
+            
+            'HOLA': 'hola', 'GRACIAS': 'gracias', 'AYUDA': 'ayuda', 'NOMBRE': 'nombre', 
+            'COMER': 'comer', 'BEBER': 'beber', 'BAÑO': 'baño', 'ESPERA': 'espera',
+            '¿CÓMO?': 'como', 'BIEN': 'bien', 'MAL': 'mal',
+            '¿QUIÉN?': 'quien', '¿QUÉ?': 'que', '¿CUÁNDO?': 'cuando', '¿DÓNDE?': 'donde', '¿POR QUÉ?': 'porque'
+        };
+        
+        const GITHUB_PAGES_URL = 'https://alex-moonie.github.io/ManiManita-Fotos/';
+
+        function appendLetter(letter, sourceButton = null) {
+            const img = document.createElement('img');
+            let imageSrc = '';
+            
+            if (sourceButton) {
+                const signImage = sourceButton.querySelector('.sign-image');
+                imageSrc = signImage ? signImage.src : '';
+            } 
+            
+            if (!imageSrc) {
+                const fileName = SIGN_MAP[letter]; 
+                
+                if (fileName) {
+                    let extension = '.png';
+                    if (fileName.includes('Letra')) {
+                        extension = '.png'; 
+                    }
+                    imageSrc = GITHUB_PAGES_URL + fileName + extension;
+                }
+            }
+            
+            if (!imageSrc) return; 
+
+            img.src = imageSrc;
+            
+            const altText = {
+                 'CERO': '0', 'UNO': '1', 'DOS': '2', 'TRES': '3', 'CUATRO': '4',
+                 'CINCO': '5', 'SEIS': '6', 'SIETE': '7', 'OCHO': '8', 'NUEVE': '9', 'DIEZ': '10'
+            }[letter] || letter;
+
+            img.alt = `Seña ${altText}`;
+            img.classList.add('sign-output-image');
+            outputArea.appendChild(img);
+        }
+
+        function getOutputText() {
+            const children = outputArea.children;
+            let text = '';
+            for (let i = 0; i < children.length; i++) {
+                const child = children[i];
+                if (child.classList.contains('sign-output-image')) {
+                    const alt = child.alt;
+                    if (alt.startsWith('Seña ')) {
+                        text += alt.substring(5) + ' '; 
+                    }
+                } else if (child.classList.contains('output-space')) {
+                    text += ' ';
+                }
+            }
+            return text.trim(); 
+        }
+
+        function convertTextToSigns(text) {
+             outputArea.innerHTML = ''; 
+             if (!text) return;
+
+             const upperText = text.toUpperCase();
+             const words = upperText.split(/\s+/).filter(word => word.length > 0); 
+             
+             const conceptKeys = Object.keys(SIGN_MAP).filter(k => k.length > 2 && !k.match(/^[A-ZÑ]{1,2}$/)); 
+             const allKeys = Object.keys(SIGN_MAP);
+
+             words.forEach((word, index) => {
+                 let bestMatch = null;
+                 let matchedKey = '';
+
+                 const cleanWord = word.replace(/[¿?.,!]/g, '');
+                 
+                 if (conceptKeys.includes(cleanWord)) {
+                     bestMatch = SIGN_MAP[cleanWord];
+                     matchedKey = cleanWord;
+                 } 
+                 
+                 if (bestMatch) {
+                      appendLetter(matchedKey);
+                 } else {
+                      for (let i = 0; i < word.length; i++) {
+                          let char = word[i];
+                          let key = '';
+                          
+                          const twoChars = word.substring(i, i + 2);
+                          if (allKeys.includes(twoChars)) {
+                              key = twoChars;
+                              i++;
+                          } else if (allKeys.includes(char)) {
+                              key = char;
+                          }
+                          
+                          if (key) {
+                              appendLetter(key);
+                          }
+                      }
+                 }
+                 
+                 if (index < words.length - 1) {
+                     const spaceDiv = document.createElement('div');
+                     spaceDiv.classList.add('output-space');
+                     outputArea.appendChild(spaceDiv);
+                 }
+             });
+        }
+
+    function handleCopyFromModal() {
+        const textToCopy = getOutputText(); 
+        
+        if (!textToCopy) {
+            alert("No hay mensaje para copiar.");
+            return;
+        }
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            configCopyButton.textContent = '¡COPIADO! ✅';
+            setTimeout(() => { 
+                configCopyButton.textContent = 'Copiar Texto Generado 📋'; 
+                toggleModal(false); 
+            }, 1500);
+        }).catch(err => {
+            console.error('Error al copiar: ', err);
+            configCopyButton.textContent = 'Error al Copiar ❌';
+            setTimeout(() => { configCopyButton.textContent = 'Copiar Texto Generado 📋'; }, 2000);
+        });
+    }
+
+    function handleClearAll() {
+        outputArea.innerHTML = '';
+        textInputArea.value = '';
+        
+        if (this === configClearButton) {
+             configClearButton.textContent = '¡LIMPIADO! 🧼';
+             setTimeout(() => { 
+                configClearButton.textContent = 'Limpiar Área de Salida 🗑️'; 
+                toggleModal(false); 
+            }, 1000);
+        } else {
+             if (currentMode === 'text') {
+                convertTextToSigns(textInputArea.value);
+             }
+        }
+    }
+
+    function toggleModal(show) {
+        configModal.style.display = show ? 'block' : 'none';
+    }
+
+    function toggleDarkMode() {
+        body.classList.toggle('dark-mode');
+        const isDarkMode = body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+        
+        configDarkModeButton.textContent = isDarkMode ? 'Cambiar a Modo Claro ☀️' : 'Cambiar a Modo Oscuro 🌙';
+        configButton.style.color = isDarkMode ? 'var(--dark-text-color)' : 'var(--concept-color)';
+    }
+
+    function showInfo() {
+        alert('💖 Mani_Manita - Traductor de Lenguaje de Señas 🤟\n\nCreado para facilitar la comunicación a la comunidad sorda, convirtiendo texto en señas de LSA. \n\nHecho con amor. ¡Gracias por usarlo!');
+        toggleModal(false);
+    }
+
+    function switchBaseKeyboardView(viewName) {
+        if (currentExtraKeyboard) {
+            toggleExtraKeyboardView(currentExtraKeyboard);
+        }
+
+        const views = {
+            'alpha': alphaKeyboardView,
+            'number': numberKeyboardView,
+        };
+        
+        const oldView = views[currentActiveKeyboard];
+        if (oldView) oldView.style.display = 'none';
+        
+        if (viewName in views) {
+            views[viewName].style.display = 'block';
+            currentActiveKeyboard = viewName;
+        }
+        
+        categoryButtons.forEach(btn => {
+             btn.classList.remove('active');
+             if (btn.getAttribute('data-view') === viewName) {
+                 btn.classList.add('active');
+             }
+        });
+    }
+
+    function toggleExtraKeyboardView(viewName) {
+        const extraViews = {
+            'concepts': conceptsKeyboardView,
+            'questions': questionsKeyboardView
+        };
+        
+        if (currentExtraKeyboard && extraViews[currentExtraKeyboard]) {
+            extraViews[currentExtraKeyboard].style.display = 'none';
+        }
+
+        if (currentExtraKeyboard === viewName) {
+            currentExtraKeyboard = null;
+        } else {
+            if (viewName in extraViews) {
+                extraViews[viewName].style.display = 'block';
+                currentExtraKeyboard = viewName;
+            }
+        }
+    }
+    
+    function toggleExtrasPanel(forceState = null) {
+        const isDesktop = window.innerWidth >= 800;
+        
+        if (isDesktop) {
+             categorySelectorPanel.style.display = 'flex';
+             document.querySelector('.category-button[data-view="alpha"]').style.display = 'inline-block';
+             document.querySelector('.category-button[data-view="numbers"]').style.display = 'inline-block';
+             document.querySelector('.category-button[data-view="concepts"]').style.display = 'inline-block';
+             document.querySelector('.category-button[data-view="questions"]').style.display = 'inline-block';
+             return;
+        }
+        
+        extraPanelOpen = (forceState !== null) ? forceState : !extraPanelOpen;
+        
+        document.querySelector('.category-button[data-view="alpha"]').style.display = 'none';
+        document.querySelector('.category-button[data-view="numbers"]').style.display = 'none';
+        
+        if (extraPanelOpen) {
+             categorySelectorPanel.style.display = 'flex';
+             toggleExtrasButton.textContent = '➖';
+             
+             document.querySelector('.category-button[data-view="concepts"]').style.display = 'inline-block';
+             document.querySelector('.category-button[data-view="questions"]').style.display = 'inline-block';
+
+        } else {
+             categorySelectorPanel.style.display = 'none';
+             toggleExtrasButton.textContent = '➕';
+             
+             if (currentExtraKeyboard) {
+                 toggleExtraKeyboardView(currentExtraKeyboard);
+             }
+        }
+    }
+
+    const modeConfig = {
+        sign: {
+            buttonText: 'Cambiar a Modo Texto ✍️',
+            modeStatusText: 'Estás usando Modo: SEÑAS 🤟',
+            mainInteractionDisplay: 'block', 
+            textInputDisplay: 'none',
+            isTextMode: false,
+        },
+        text: {
+            buttonText: 'Cambiar a Modo Señas 🤟',
+            modeStatusText: 'Estás usando Modo: TEXTO ✍️',
+            mainInteractionDisplay: 'none',
+            textInputDisplay: 'block',
+            isTextMode: true,
+        }
+    };
+
+    function applyMode(mode) {
+        const config = modeConfig[mode];
+        currentMode = mode; 
+
+        const mainInteraction = document.getElementById('main-interaction');
+        if (mainInteraction) {
+             mainInteraction.style.display = config.mainInteractionDisplay;
+        }
+        textInputArea.style.display = config.textInputDisplay; 
+        
+        if (config.isTextMode) {
+             mainContainer.classList.add('text-mode-active'); 
+        } else {
+             mainContainer.classList.remove('text-mode-active');
+             if (textInputArea.value !== '') {
+                textInputArea.value = ''; 
+             }
+             switchBaseKeyboardView('alpha'); 
+        }
+        
+        numModeButton.style.display = (mode === 'sign') ? 'flex' : 'none';
+        spaceButton.style.display = (mode === 'sign') ? 'flex' : 'none';
+        sendChatButton.style.display = 'flex'; // Mantener visible en ambos modos para enviar la respuesta
+
+        toggleExtrasPanel(mode === 'sign' ? (window.innerWidth >= 800 ? true : false) : false);
+        
+        modeSwitchButton.textContent = config.buttonText;
+        modeStatusDiv.textContent = config.modeStatusText;
+        
+        if (mode === 'text') {
+             convertTextToSigns(textInputArea.value);
+        }
+    }
+    
+    // ===================================================================
+    // === FUNCIONES DE CHAT Y QR (INTEGRACIÓN) ===
+    // ===================================================================
+
+    function generateRoomCode() {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
+    function generateQrCode(elementId, text, size = 200) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        element.innerHTML = '';
+        
+        if (text) {
+            new QRCode(element, {
+                text: text,
+                width: size,
+                height: size,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+
+    function joinRoom(roomCode) {
+        if (socket) {
+            socket.disconnect(); 
+        }
+        
+        socket = io(SERVER_URL);
+        currentRoomCode = roomCode;
+        
+        socket.on('connect', () => {
+            socket.emit('join_room', currentRoomCode);
+            modeStatusDiv.textContent = `Sala Conectada: ${currentRoomCode} ✅`;
+            modeStatusDiv.style.backgroundColor = 'var(--connected-color)'; 
+        });
+        
+        socket.on('receive_message', (message) => {
+            // Recibe el mensaje y lo pone en el área de texto (para que se convierta a señas si está en modo texto)
+            textInputArea.value = message;
+            if (currentMode === 'text') {
+                 convertTextToSigns(message);
+            } else {
+                 // Si está en modo señas, puede ser confuso. Lo pasaremos a modo texto para visualizarlo bien.
+                 applyMode('text');
+                 convertTextToSigns(message);
+            }
+            // Notificación al usuario de mensaje entrante
+            alert(`¡Mensaje del chat recibido! Mira el área de texto/salida.`);
+        });
+
+        socket.on('disconnect', () => {
+             modeStatusDiv.textContent = `Modo: SEÑAS 🤟 (Desconectado)`;
+             modeStatusDiv.style.backgroundColor = 'var(--danger-color)'; 
+        });
+    }
+
+    function sendMessage() {
+        if (!socket || !currentRoomCode) {
+             alert('Aún no estás conectado a una sala de chat. ¡Genera o escanea un QR!');
+            return;
+        }
+        
+        // Obtiene el texto de salida (que son las señas traducidas)
+        const messageToSend = getOutputText(); 
+        if (messageToSend.trim() === '') return;
+        
+        const data = {
+            room: currentRoomCode,
+            message: messageToSend.trim()
+        };
+        
+        socket.emit('send_message', data);
+    }
+
+    function checkUrlForRoomCode() {
+        const hash = window.location.hash;
+        const match = hash.match(/#room=([A-Z0-9]+)/i);
+        if (match && match[1]) {
+            const roomCode = match[1].toUpperCase();
+            joinRoom(roomCode);
+            if (qrModal) qrModal.style.display = 'none'; 
+        }
+    }
+
+    // ===================================================================
+    // === MANEJADORES DE EVENTOS ORIGINALES (AÑADIDOS) ===
+    // ===================================================================
+    
+    document.getElementById('main-interaction').addEventListener('click', (event) => {
+        if (currentMode === 'sign') {
+            const button = event.target.closest('.sign-button');
+            if (button) {
+                const letter = button.getAttribute('data-letter');
+                if (letter) {
+                    appendLetter(letter, button); 
+                }
+            }
+        }
+    });
+
+    toggleExtrasButton.addEventListener('click', () => {
+         toggleExtrasPanel();
+    });
+
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+             const view = event.currentTarget.getAttribute('data-view');
+             
+             if (view === 'alpha' || view === 'numbers') {
+                 switchBaseKeyboardView(view);
+                 if (currentExtraKeyboard) toggleExtraKeyboardView(currentExtraKeyboard);
+                 
+             } else {
+                 toggleExtraKeyboardView(view);
+             }
+        });
+    });
+
+    numModeButton.addEventListener('click', () => {
+         if (currentMode === 'sign') {
+             const newView = (currentActiveKeyboard === 'alpha') ? 'number' : 'alpha';
+             switchBaseKeyboardView(newView);
+             if (currentExtraKeyboard) toggleExtraKeyboardView(currentExtraKeyboard);
+         }
+    });
+    
+    spaceButton.addEventListener('click', () => {
+        if (currentMode === 'sign') {
+            const spaceDiv = document.createElement('div');
+            spaceDiv.classList.add('output-space');
+            outputArea.appendChild(spaceDiv);
+        }
+    });
+
+    deleteButton.addEventListener('click', () => {
+        if (currentMode === 'sign') {
+            if (outputArea.lastChild) {
+                outputArea.removeChild(outputArea.lastChild);
+            }
+        } else {
+            let currentText = textInputArea.value;
+            textInputArea.value = currentText.slice(0, -1);
+            convertTextToSigns(textInputArea.value);
+        }
+    });
+
+    clearAllButton.addEventListener('click', handleClearAll);
+
+    modeSwitchButton.addEventListener('click', () => {
+        const newMode = (currentMode === 'sign') ? 'text' : 'sign';
+        applyMode(newMode);
+    });
+
+    textInputArea.addEventListener('input', (event) => {
+        if (currentMode === 'text') {
+            convertTextToSigns(event.target.value);
+        }
+    });
+    
+    configButton.addEventListener('click', () => {
+        toggleModal(true);
+    });
+
+    closeModalButton.addEventListener('click', () => {
+        toggleModal(false);
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === configModal) {
+            toggleModal(false);
+        }
+    });
+
+    configCopyButton.addEventListener('click', handleCopyFromModal);
+    configClearButton.addEventListener('click', handleClearAll);
+    configDarkModeButton.addEventListener('click', toggleDarkMode);
+    configInfoButton.addEventListener('click', showInfo);
+    
+    // ===================================================================
+    // === MANEJADORES DE EVENTOS DE CHAT/QR (NUEVOS) ===
+    // ===================================================================
+
+    // 1. Abrir el modal de QR
+    configQrButton.addEventListener('click', () => {
+        configModal.style.display = 'none'; // Cierra el modal de configuración principal
+        qrModal.style.display = 'block'; // Abre el modal de QR
+    });
+
+    // 2. Cerrar el modal de QR
+    closeQrModalButton.addEventListener('click', () => {
+        qrModal.style.display = 'none';
+    });
+    
+    // 3. Generar QR de Sala
+    generateRoomQrButton.addEventListener('click', () => {
+        const code = currentRoomCode || generateRoomCode();
+        // Genera la URL de conexión incluyendo el código de sala como fragmento
+        const roomUrl = `${window.location.href.split('#')[0]}#room=${code}`;
+        
+        generateQrCode('room-qr-code', roomUrl, 200);
+        joinRoom(code);
+        
+        generateRoomQrButton.textContent = `Conectado a Sala: ${code} (clic para Nuevo QR)`;
+    });
+
+    // 4. Generar QR de Mensaje
+    generateMessageQrButton.addEventListener('click', () => {
+        const textToEncode = getOutputText(); 
+        if (textToEncode.trim() === '') {
+            generateQrCode('message-qr-code', '');
+            return;
+        }
+        generateQrCode('message-qr-code', textToEncode, 200);
+    });
+    
+    // 5. Enviar Mensaje de Chat
+    sendChatButton.addEventListener('click', sendMessage);
+
+
+    // ===================================================================
+    // === INICIALIZACIÓN ===
+    // ===================================================================
+    
+    const savedDarkMode = localStorage.getItem('darkMode');
+    
+    if (savedDarkMode === 'enabled') {
+        body.classList.add('dark-mode');
+        configDarkModeButton.textContent = 'Cambiar a Modo Claro ☀️';
+        configButton.style.color = 'var(--dark-text-color)'; 
+    } else {
+        body.classList.remove('dark-mode'); 
+        configDarkModeButton.textContent = 'Cambiar a Modo Oscuro 🌙';
+        configButton.style.color = 'var(--concept-color)'; 
+        
+        if (!savedDarkMode || savedDarkMode !== 'disabled') {
+             localStorage.setItem('darkMode', 'disabled');
+        }
+    }
+    
+    applyMode('sign');
+    
+    switchBaseKeyboardView('alpha'); 
+    
+    toggleExtrasPanel(window.innerWidth >= 800 ? true : false); 
+    
+    // Verificar si se abrió la URL con un código QR (para unirse automáticamente)
+    checkUrlForRoomCode(); 
+
+</script>
+</body>
+</html>

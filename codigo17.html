@@ -1199,10 +1199,7 @@
         if (socket) {
             socket.disconnect(); 
         }
-        
-        socket = io(SERVER_URL);
         currentRoomCode = roomCode;
-        
         socket.on('connect', () => {
             socket.emit('join_room', currentRoomCode);
             modeStatusDiv.textContent = `Sala Conectada: ${currentRoomCode} ✅`;
